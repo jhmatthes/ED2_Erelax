@@ -657,6 +657,11 @@ module rk4_driver
 
 
 
+      !------------------------------------------------------------------------------------!
+      !    For now, hard code a flag to skip solving the leaf energy balance and prescribe !
+      !    the leaf temperature as air temperature.					   !
+      !------------------------------------------------------------------------------------!
+      goto 100
 
       !------------------------------------------------------------------------------------!
       !     Cohort variables.  Here we must check whether the cohort was really solved or  !
@@ -703,7 +708,7 @@ module rk4_driver
                   !------------------------------------------------------------------------!
                   !     The intercellular specific humidity is always assumed to be at     !
                   ! saturation for a given temperature.  Find the saturation mixing ratio, !
-                  ! then convert it to specific humidity.                                  !
+		                    ! then convert it to specific humidity.                                  !
                   !------------------------------------------------------------------------!
                   cpatch%lint_shv(ico) = qslif(csite%can_prss(ipa),cpatch%leaf_temp(ico))
                   !------------------------------------------------------------------------!
@@ -1042,10 +1047,6 @@ module rk4_driver
             end if
             !------------------------------------------------------------------------------!
 
-
-
-
-
             !------------------------------------------------------------------------------!
             !  WOOD                                                                        !
             !------------------------------------------------------------------------------!
@@ -1141,10 +1142,82 @@ module rk4_driver
                !---------------------------------------------------------------------------!
             end if
             !------------------------------------------------------------------------------!
-         end select
+	 end select
+	 end do
          !---------------------------------------------------------------------------------!
 
+	 !------------------------------------------------------------------------------------!
+      	 !    SELECT CASE WHERE IMPLEMENT LEAF & BRANCH TEMPERATURE AS AIR TEMPERATURE        !
+      	 !------------------------------------------------------------------------------------!	 
+	 100 continue
+	 !------------------------------------------------------------------------------------!
+      	 !     Cohort variables.  Here we must check whether the cohort was really solved or  !
+      	 ! it was skipped after being flagged as "unsafe".  In case the cohort was skipped,   !
+      	 ! we must check whether it was because it was too small or because it was buried in  !
+      	 ! snow.                                                                              !
+      	 !------------------------------------------------------------------------------------!
+      	 do ico = 1,cpatch%ncohorts
 
+            !------------------------------------------------------------------------------!
+            !  VEGETATION -- Leaf and branchwood were solved together, so they must remain !
+            !                in thermal equilibrium.                                       !
+            !------------------------------------------------------------------------------!
+
+               !---------------------------------------------------------------------------!
+               !     For all patches, fix the leaf                                         !
+               ! and branch temperatures to the canopy air space and force leaf and branch !
+               ! intercepted water to be zero.                                             !
+               !---------------------------------------------------------------------------!
+               cpatch%leaf_temp(ico) = csite%can_temp(ipa)
+               cpatch%wood_temp(ico) = cpatch%leaf_temp(ico)
+
+               if (cpatch%leaf_temp(ico) == t3ple) then
+                  cpatch%leaf_fliq(ico) = 0.5
+                  cpatch%wood_fliq(ico) = 0.5
+               elseif (cpatch%leaf_temp(ico) > t3ple) then
+                  cpatch%leaf_fliq(ico) = 1.0
+                  cpatch%wood_fliq(ico) = 1.0
+               else
+                  cpatch%leaf_fliq(ico) = 0.0
+                  cpatch%wood_fliq(ico) = 0.0
+               end if
+               cpatch%leaf_water(ico)   = 0.
+               cpatch%wood_water(ico)   = 0.
+               !---------------------------------------------------------------------------!
+
+
+               !---------------------------------------------------------------------------!
+               !     Find the internal energy diagnostically...                            !
+               !---------------------------------------------------------------------------!
+               cpatch%leaf_energy(ico) = cmtl2uext( cpatch%leaf_hcap (ico)                 &
+                                                  , cpatch%leaf_water(ico)                 &
+                                                  , cpatch%leaf_temp (ico)                 &
+                                                  , cpatch%leaf_fliq (ico)                 )
+               cpatch%wood_energy(ico) = cmtl2uext( cpatch%wood_hcap (ico)                 &
+                                                  , cpatch%wood_water(ico)                 &
+                                                  , cpatch%wood_temp (ico)                 &
+                                                  , cpatch%wood_fliq (ico)                 )
+               !---------------------------------------------------------------------------!
+
+
+
+               !---------------------------------------------------------------------------!
+               !     The intercellular specific humidity is always assumed to be at        !
+               ! saturation for a given temperature.  Find the saturation mixing ratio,    !
+               ! then convert it to specific humidity.                                     !
+               !---------------------------------------------------------------------------!
+               cpatch%lint_shv(ico) = qslif(csite%can_prss(ipa),cpatch%leaf_temp(ico))
+               !----- Copy the meteorological wind to here. -------------------------------!
+               cpatch%veg_wind(ico) = sngloff(rk4site%vels, tiny_offset)
+               !----- Set water demand and conductances to zero. --------------------------!
+               cpatch%psi_open  (ico) = 0.0
+               cpatch%psi_closed(ico) = 0.0
+               cpatch%leaf_gbh  (ico) = 0.0
+               cpatch%leaf_gbw  (ico) = 0.0
+               cpatch%wood_gbh  (ico) = 0.0
+               cpatch%wood_gbw  (ico) = 0.0
+               !---------------------------------------------------------------------------!
+	 
          !---------------------------------------------------------------------------------!
          !     Final sanity check.  This should be removed soon, since it should never     !
          ! happen (well, if this still happens, then it's a bug, and we should remove the  !
@@ -1210,6 +1283,7 @@ module rk4_driver
          end if
          !---------------------------------------------------------------------------------!
       end do
+ 
 
       !------ Copy the ground variables to the output. ------------------------------------!
       csite%ground_shv (ipa) = sngloff(initp%ground_shv , tiny_offset)

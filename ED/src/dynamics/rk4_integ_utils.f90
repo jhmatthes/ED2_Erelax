@@ -394,6 +394,7 @@ subroutine inc_rk4_patch(rkp, inc, fac, cpatch)
    rkp%qpwp = rkp%qpwp + fac * inc%qpwp
    rkp%cpwp = rkp%cpwp + fac * inc%cpwp
 
+   goto 100
    do ico = 1,cpatch%ncohorts
       rkp%leaf_water (ico) = rkp%leaf_water (ico) + fac * inc%leaf_water (ico)
       rkp%leaf_energy(ico) = rkp%leaf_energy(ico) + fac * inc%leaf_energy(ico)
@@ -405,7 +406,8 @@ subroutine inc_rk4_patch(rkp, inc, fac, cpatch)
       rkp%psi_open  (ico) = rkp%psi_open  (ico) + fac * inc%psi_open  (ico)
       rkp%psi_closed(ico) = rkp%psi_closed(ico) + fac * inc%psi_closed(ico)
    end do
-
+   100 continue
+   
    if (checkbudget) then
 
       rkp%co2budget_storage      = rkp%co2budget_storage     + fac * inc%co2budget_storage
@@ -693,7 +695,7 @@ subroutine get_yscal(y,dy,htry,yscal,cpatch)
    !---------------------------------------------------------------------------------------!
 
 
-
+   goto 100
    !---------------------------------------------------------------------------------------!
    !    Scale for leaf, wood, and vegetation water and energy.  In case the plants have    !
    ! few or no leaves, or the plant is buried in snow, we assign huge values for typical   !
@@ -724,7 +726,6 @@ subroutine get_yscal(y,dy,htry,yscal,cpatch)
             yscal%veg_energy(ico) = huge_offset
          end if
          !---------------------------------------------------------------------------------!
-
 
 
          !----- No need to scale wood and leaf correctly, let's make it always acceptable. !
@@ -791,7 +792,7 @@ subroutine get_yscal(y,dy,htry,yscal,cpatch)
       end do
    end select
    !---------------------------------------------------------------------------------------!
-
+   100 continue
 
 
    !---------------------------------------------------------------------------------------!
@@ -985,7 +986,7 @@ subroutine get_errmax(errmax,yerr,yscal,cpatch,y,ytemp)
    !---------------------------------------------------------------------------------------!
 
 
-
+   goto 100
    !---------------------------------------------------------------------------------------!
    !     Get the worst error only amongst the cohorts in which leaf or wood properties     !
    ! were computed.                                                                        !
@@ -1059,7 +1060,7 @@ subroutine get_errmax(errmax,yerr,yscal,cpatch,y,ytemp)
       !------------------------------------------------------------------------------------!
    end select
    !---------------------------------------------------------------------------------------!
-
+   100 continue
 
    !---------------------------------------------------------------------------------------!
    !     Virtual pool.                                                                     !
