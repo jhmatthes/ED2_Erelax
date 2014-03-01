@@ -708,7 +708,7 @@ module rk4_driver
                   !------------------------------------------------------------------------!
                   !     The intercellular specific humidity is always assumed to be at     !
                   ! saturation for a given temperature.  Find the saturation mixing ratio, !
-		                    ! then convert it to specific humidity.                                  !
+		                    ! then convert it to specific humidity.                !
                   !------------------------------------------------------------------------!
                   cpatch%lint_shv(ico) = qslif(csite%can_prss(ipa),cpatch%leaf_temp(ico))
                   !------------------------------------------------------------------------!
@@ -1150,12 +1150,7 @@ module rk4_driver
       	 !    SELECT CASE WHERE IMPLEMENT LEAF & BRANCH TEMPERATURE AS AIR TEMPERATURE        !
       	 !------------------------------------------------------------------------------------!	 
 	 100 continue
-	 !------------------------------------------------------------------------------------!
-      	 !     Cohort variables.  Here we must check whether the cohort was really solved or  !
-      	 ! it was skipped after being flagged as "unsafe".  In case the cohort was skipped,   !
-      	 ! we must check whether it was because it was too small or because it was buried in  !
-      	 ! snow.                                                                              !
-      	 !------------------------------------------------------------------------------------!
+
       	 do ico = 1,cpatch%ncohorts
 
             !------------------------------------------------------------------------------!
@@ -1199,6 +1194,24 @@ module rk4_driver
                                                   , cpatch%wood_fliq (ico)                 )
                !---------------------------------------------------------------------------!
 
+	       !------------------------------------------------------------------------!
+                  !     Copy the conductances.                                             !
+                  !------------------------------------------------------------------------!
+                  cpatch%leaf_gbh(ico) = sngloff(initp%leaf_gbh(ico), tiny_offset)
+                  cpatch%leaf_gbw(ico) = sngloff(initp%leaf_gbw(ico), tiny_offset)
+                  !------------------------------------------------------------------------!
+
+
+
+                  !------------------------------------------------------------------------!
+                  !     Divide the values of water demand by the time step to obtain the   !
+                  ! average value over the past hdid period.                               !
+                  !------------------------------------------------------------------------!
+                  cpatch%psi_open  (ico) = sngloff(initp%psi_open  (ico),tiny_offset)      &
+                                         / sngl(hdid)
+                  cpatch%psi_closed(ico) = sngloff(initp%psi_closed(ico),tiny_offset)      &
+                                         / sngl(hdid)
+                  !------------------------------------------------------------------------!
 
 
                !---------------------------------------------------------------------------!
@@ -1210,10 +1223,10 @@ module rk4_driver
                !----- Copy the meteorological wind to here. -------------------------------!
                cpatch%veg_wind(ico) = sngloff(rk4site%vels, tiny_offset)
                !----- Set water demand and conductances to zero. --------------------------!
-               cpatch%psi_open  (ico) = 0.0
-               cpatch%psi_closed(ico) = 0.0
-               cpatch%leaf_gbh  (ico) = 0.0
-               cpatch%leaf_gbw  (ico) = 0.0
+!               cpatch%psi_open  (ico) = 0.0
+!               cpatch%psi_closed(ico) = 0.0
+!               cpatch%leaf_gbh  (ico) = 0.0
+!               cpatch%leaf_gbw  (ico) = 0.0
                cpatch%wood_gbh  (ico) = 0.0
                cpatch%wood_gbw  (ico) = 0.0
                !---------------------------------------------------------------------------!

@@ -394,19 +394,19 @@ subroutine inc_rk4_patch(rkp, inc, fac, cpatch)
    rkp%qpwp = rkp%qpwp + fac * inc%qpwp
    rkp%cpwp = rkp%cpwp + fac * inc%cpwp
 
-   goto 100
+!   goto 100
    do ico = 1,cpatch%ncohorts
       rkp%leaf_water (ico) = rkp%leaf_water (ico) + fac * inc%leaf_water (ico)
-      rkp%leaf_energy(ico) = rkp%leaf_energy(ico) + fac * inc%leaf_energy(ico)
+!      rkp%leaf_energy(ico) = rkp%leaf_energy(ico) + fac * inc%leaf_energy(ico)
       rkp%wood_water (ico) = rkp%wood_water (ico) + fac * inc%wood_water (ico)
-      rkp%wood_energy(ico) = rkp%wood_energy(ico) + fac * inc%wood_energy(ico)
+!      rkp%wood_energy(ico) = rkp%wood_energy(ico) + fac * inc%wood_energy(ico)
       rkp%veg_water (ico)  = rkp%veg_water  (ico) + fac * inc%veg_water  (ico)
-      rkp%veg_energy(ico)  = rkp%veg_energy (ico) + fac * inc%veg_energy (ico)
+!      rkp%veg_energy(ico)  = rkp%veg_energy (ico) + fac * inc%veg_energy (ico)
 
       rkp%psi_open  (ico) = rkp%psi_open  (ico) + fac * inc%psi_open  (ico)
       rkp%psi_closed(ico) = rkp%psi_closed(ico) + fac * inc%psi_closed(ico)
    end do
-   100 continue
+!   100 continue
    
    if (checkbudget) then
 
@@ -793,7 +793,14 @@ subroutine get_yscal(y,dy,htry,yscal,cpatch)
    end select
    !---------------------------------------------------------------------------------------!
    100 continue
-
+   do ico=1,cpatch%ncohorts
+     yscal%leaf_water(ico)  = huge_offset !NEW
+     yscal%leaf_energy(ico) = huge_offset
+     yscal%leaf_temp(ico)   = huge_offset
+     yscal%wood_water(ico)  = huge_offset
+     yscal%wood_energy(ico) = huge_offset
+     yscal%wood_temp(ico)   = huge_offset
+   end do
 
    !---------------------------------------------------------------------------------------!
    !     Here we just need to make sure the user is checking mass, otherwise  these vari-  !

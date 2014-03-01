@@ -38,7 +38,8 @@ subroutine copy_patch_init(sourcesite,ipa,targetp)
                                     , reducedpress8          & ! function
                                     , press2exner8           & ! function
                                     , extheta2temp8          & ! function
-                                    , tq2enthalpy8           ! ! function
+                                    , tq2enthalpy8           & ! function
+                                    , cmtl2uext8              !   subroutine
    use soil_coms             , only : soil8                  ! ! intent(in)
    use ed_therm_lib          , only : ed_grndvap8            ! ! subroutine
    use canopy_struct_dynamics, only : canopy_turbulence8     ! ! subroutine
@@ -279,6 +280,25 @@ subroutine copy_patch_init(sourcesite,ipa,targetp)
       ! and the fraction of leaf water.  Otherwise, just fill with some safe values, but   !
       ! the leaves won't be really solved.                                                 !
       !------------------------------------------------------------------------------------!
+      targetp%leaf_temp  (ico) = targetp%can_temp !NEW
+      targetp%leaf_water (ico) = max(0.d0,dble(cpatch%leaf_water (ico))) !NEW
+      targetp%leaf_hcap  (ico) = dble(cpatch%leaf_hcap  (ico)) !NEW
+      targetp%leaf_fliq  (ico) = dble(cpatch%leaf_fliq  (ico)) !NEW
+      targetp%leaf_energy(ico) = cmtl2uext8( targetp%leaf_hcap (ico)                 &
+                                                  , targetp%leaf_water(ico)                 &
+                                                  , targetp%leaf_temp (ico)                 &
+                                                  , targetp%leaf_fliq (ico)                 )
+      
+      targetp%wood_temp  (ico) = targetp%can_temp !NEW
+      targetp%wood_fliq  (ico) = dble(cpatch%wood_fliq  (ico))
+      targetp%wood_water (ico) = dble(cpatch%wood_water (ico))
+      targetp%wood_hcap  (ico) = dble(cpatch%wood_hcap  (ico))
+      targetp%wood_energy(ico) = cmtl2uext8( targetp%wood_hcap (ico)                 &
+                                                  , targetp%wood_water(ico)                 &
+                                                  , targetp%wood_temp (ico)                 &
+                                                  , targetp%wood_fliq (ico)                 )
+
+      goto 300
       if (targetp%leaf_resolvable(ico)) then
          targetp%leaf_energy(ico) = dble(cpatch%leaf_energy(ico))
          targetp%leaf_water (ico) = max(0.d0,dble(cpatch%leaf_water (ico)))
@@ -319,7 +339,7 @@ subroutine copy_patch_init(sourcesite,ipa,targetp)
          targetp%wood_energy(ico) = targetp%wood_hcap(ico) * targetp%wood_temp(ico)
       end if
       !------------------------------------------------------------------------------------!
-
+300 continue
 
       !------------------------------------------------------------------------------------!
       !   Make the combined leaf and branchwood pool.  It will be really used only if      !
@@ -852,7 +872,7 @@ subroutine update_diagnostic_vars(initp, csite,ipa)
 
 
 
-
+   goto 200 !skip all this, assign leaf & wood temps to can temp, and calculate energy directly
    !---------------------------------------------------------------------------------------!
    !     Now we update leaf and branch properties, based on which kind of branch thermo-   !
    ! dynamics we're using.                                                                 !
@@ -868,6 +888,7 @@ subroutine update_diagnostic_vars(initp, csite,ipa)
       !step.                                                                               !
       !------------------------------------------------------------------------------------!
       vegloop: do ico=1,cpatch%ncohorts
+
          !----- Check whether the cohort is safe... ---------------------------------------!
          if (initp%veg_resolvable(ico)) then
 
@@ -926,8 +947,7 @@ subroutine update_diagnostic_vars(initp, csite,ipa)
                call uextcm2tl8(initp%veg_energy(ico),initp%veg_water(ico)                  &
                               ,initp%veg_hcap(ico),veg_temp,veg_fliq)
                !---------------------------------------------------------------------------!
-
-
+          
 
                if (veg_temp < rk4min_veg_temp .or. veg_temp > rk4max_veg_temp) then
                   !------------------------------------------------------------------------!
@@ -957,7 +977,12 @@ subroutine update_diagnostic_vars(initp, csite,ipa)
                   initp%leaf_fliq(ico) = veg_fliq
                   initp%wood_fliq(ico) = veg_fliq
                   !------------------------------------------------------------------------!
-
+  
+                  initp%leaf_temp(ico)   = initp%can_temp !NEW
+                  initp%wood_temp(ico)   = initp%can_temp !NEW
+                  initp%leaf_fliq(ico) = 1.0
+                  initp%wood_fliq(ico) = 1.0
+      
 
                   !----- Split vegetation water according to LAI and WAI. -----------------!
                   initp%leaf_water(ico) = initp%veg_water(ico) * wgt_leaf
@@ -988,6 +1013,8 @@ subroutine update_diagnostic_vars(initp, csite,ipa)
             end if
             !------------------------------------------------------------------------------!
          else
+
+ 
             !------------------------------------------------------------------------------!
             !     For plants with minimal foliage or very sparse patches, fix the leaf     !
             ! and wood temperatures to the canopy air space and force leaf_water and       !
@@ -1039,6 +1066,7 @@ subroutine update_diagnostic_vars(initp, csite,ipa)
       ! pool (either being the only vegetation pool or treated as a separate pool).        !
       !------------------------------------------------------------------------------------!
       leafloop: do ico=1,cpatch%ncohorts
+         
          !----- Check whether the leaves of this cohort are safe... -----------------------!
          if (initp%leaf_resolvable(ico)) then
 
@@ -1071,6 +1099,7 @@ subroutine update_diagnostic_vars(initp, csite,ipa)
             end if
             !------------------------------------------------------------------------------!
          else
+         
             !------------------------------------------------------------------------------!
             !     For plants with minimal foliage or very sparse patches, fix the leaf     !
             ! temperature to the canopy air space and force leaf_water to be zero.         !
@@ -1178,6 +1207,47 @@ subroutine update_diagnostic_vars(initp, csite,ipa)
       !------------------------------------------------------------------------------------!
    end select
    !---------------------------------------------------------------------------------------!
+
+   200 continue
+   !Assign the canopy temp to leaf and wood temperature and calculate internal energy directly
+
+    do ico=1,cpatch%ncohorts
+          initp%leaf_temp(ico)   = initp%can_temp
+          initp%leaf_water(ico)  = rk4min_veg_lwater * initp%lai(ico)
+          initp%leaf_energy(ico) = cmtl2uext8( initp%leaf_hcap (ico)                     &
+                                               , initp%leaf_water(ico)                     &
+                                               , initp%leaf_temp (ico)                     &
+                                               , initp%leaf_fliq (ico) )
+
+          if (initp%leaf_temp(ico) == t3ple8) then
+               initp%leaf_fliq(ico) = 5.d-1
+          elseif (initp%leaf_temp(ico) > t3ple8) then
+               initp%leaf_fliq(ico) = 1.d0
+          else
+               initp%leaf_fliq(ico) = 0.d0
+          end if
+          
+          initp%wood_temp(ico)   = initp%can_temp
+          initp%wood_water(ico)  = rk4min_veg_lwater * initp%wai(ico)
+          initp%wood_energy(ico) = cmtl2uext8( initp%wood_hcap (ico)                     &
+                                               , initp%wood_water(ico)                     &
+                                               , initp%wood_temp (ico)                     &
+                                               , initp%wood_fliq (ico) )
+
+          if (initp%wood_temp(ico) == t3ple8) then
+               initp%wood_fliq(ico) = 5.d-1
+          elseif (initp%wood_temp(ico) > t3ple8) then
+               initp%wood_fliq(ico) = 1.d0
+          else
+               initp%wood_fliq(ico) = 0.d0
+          end if
+
+     end do  
+     do ico=1,cpatch%ncohorts
+         initp%veg_energy(ico) = initp%leaf_energy(ico) + initp%wood_energy(ico)
+         initp%veg_water(ico)  = initp%leaf_water(ico)  + initp%wood_water(ico)
+      end do
+            !------------------------------------------------------------------------------!
 
 
 
@@ -2774,7 +2844,7 @@ subroutine adjust_veg_properties(initp,hdid,csite,ipa)
          !---------------------------------------------------------------------------------!
 
 
-
+         goto 101
          !---------------------------------------------------------------------------------!
          !    In case water is to be removed or added, we will need to update the          !
          ! leaf internal energy.  We want to preserve the temperature, though, because     !
@@ -2788,6 +2858,7 @@ subroutine adjust_veg_properties(initp,hdid,csite,ipa)
          old_leaf_temp   = initp%leaf_temp  (ico)
          old_leaf_fliq   = initp%leaf_fliq  (ico)
          !---------------------------------------------------------------------------------!
+         101 continue
 
          if (initp%leaf_water(ico) > max_leaf_water) then
 
