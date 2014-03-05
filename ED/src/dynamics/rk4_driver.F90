@@ -26,7 +26,9 @@ module rk4_driver
       use grid_coms              , only : nzg                  & ! intent(in)
                                         , nzs                  ! ! intent(in)
       use ed_misc_coms           , only : current_time         ! ! intent(in)
-      use therm_lib              , only : tq2enthalpy          ! ! function
+      use consts_coms            , only : t3ple                ! ! intent(in)
+      use therm_lib              , only : tq2enthalpy          & ! function
+      	  			        , cmtl2uext            ! ! subroutine
       implicit none
 
       !----------- Use MPI timing calls, need declarations --------------------------------!
@@ -43,6 +45,7 @@ module rk4_driver
       integer                                 :: isi
       integer                                 :: ipa
       integer                                 :: iun
+      integer                                 :: ico
       integer                                 :: nsteps
       real                                    :: wcurr_loss2atm
       real                                    :: ecurr_netrad
@@ -129,7 +132,34 @@ module rk4_driver
                old_can_enthalpy = tq2enthalpy(csite%can_temp(ipa),csite%can_shv(ipa),.true.)
                !---------------------------------------------------------------------------!
 
+	       !---- PRESCRIBE THE LEAF TEMP AND ENERGY -----!
+	       do ico = 1,cpatch%ncohorts
+	       	  cpatch%leaf_temp(ico) = cmet%atm_tmp
+      	       	  cpatch%wood_temp(ico) = cmet%atm_tmp
+ 
+		  if (cpatch%leaf_temp(ico) == t3ple) then
+                     cpatch%wood_fliq(ico)   = 0.5
+		     cpatch%leaf_fliq(ico)   = 0.5
+               	  elseif (cpatch%leaf_temp(ico) > t3ple) then
+                     cpatch%wood_fliq(ico)   = 1.0
+		     cpatch%leaf_fliq(ico)   = 1.0
+                  else
+                     cpatch%wood_fliq(ico)   = 0.0
+		     cpatch%leaf_fliq(ico)   = 0.0
+                  end if
 
+      	          cpatch%leaf_hcap(ico) = cpatch%leaf_hcap(ico)
+      	          cpatch%wood_hcap(ico) = cpatch%wood_hcap(ico)
+      	   
+      	          cpatch%leaf_energy(ico) = cmtl2uext( cpatch%leaf_hcap(ico)         &
+                                           , cpatch%leaf_water(ico)        &
+                                           , cpatch%leaf_temp(ico)         &
+                                           , cpatch%leaf_fliq(ico)         )
+                  cpatch%wood_energy(ico) = cmtl2uext( cpatch%wood_hcap(ico)         &
+                                           , cpatch%wood_water(ico)        &
+                                           , cpatch%wood_temp(ico)         &
+                                           , cpatch%wood_fliq(ico)         )
+	       end do
 
                !---------------------------------------------------------------------------!
                !    Copy the meteorological variables to the rk4site structure.            !
@@ -658,18 +688,15 @@ module rk4_driver
 
 
       !------------------------------------------------------------------------------------!
-      !    For now, hard code a flag to skip solving the leaf energy balance and prescribe !
-      !    the leaf temperature as air temperature.					   !
-      !------------------------------------------------------------------------------------!
-      goto 100
-
-      !------------------------------------------------------------------------------------!
       !     Cohort variables.  Here we must check whether the cohort was really solved or  !
       ! it was skipped after being flagged as "unsafe".  In case the cohort was skipped,   !
+
       ! we must check whether it was because it was too small or because it was buried in  !
       ! snow.                                                                              !
       !------------------------------------------------------------------------------------!
       do ico = 1,cpatch%ncohorts
+      	 goto 101 !NEW PLAN: skip this
+
          select case (ibranch_thermo)
          case (1)
             !------------------------------------------------------------------------------!
@@ -708,7 +735,7 @@ module rk4_driver
                   !------------------------------------------------------------------------!
                   !     The intercellular specific humidity is always assumed to be at     !
                   ! saturation for a given temperature.  Find the saturation mixing ratio, !
-		                    ! then convert it to specific humidity.                !
+                  ! then convert it to specific humidity.                                  !
                   !------------------------------------------------------------------------!
                   cpatch%lint_shv(ico) = qslif(csite%can_prss(ipa),cpatch%leaf_temp(ico))
                   !------------------------------------------------------------------------!
@@ -1047,6 +1074,10 @@ module rk4_driver
             end if
             !------------------------------------------------------------------------------!
 
+
+
+
+
             !------------------------------------------------------------------------------!
             !  WOOD                                                                        !
             !------------------------------------------------------------------------------!
@@ -1142,95 +1173,83 @@ module rk4_driver
                !---------------------------------------------------------------------------!
             end if
             !------------------------------------------------------------------------------!
-	 end select
-	 end do
+         end select
          !---------------------------------------------------------------------------------!
 
-	 !------------------------------------------------------------------------------------!
-      	 !    SELECT CASE WHERE IMPLEMENT LEAF & BRANCH TEMPERATURE AS AIR TEMPERATURE        !
-      	 !------------------------------------------------------------------------------------!	 
-	 100 continue
-
-      	 do ico = 1,cpatch%ncohorts
-
-            !------------------------------------------------------------------------------!
-            !  VEGETATION -- Leaf and branchwood were solved together, so they must remain !
-            !                in thermal equilibrium.                                       !
-            !------------------------------------------------------------------------------!
-
-               !---------------------------------------------------------------------------!
-               !     For all patches, fix the leaf                                         !
-               ! and branch temperatures to the canopy air space and force leaf and branch !
-               ! intercepted water to be zero.                                             !
-               !---------------------------------------------------------------------------!
-               cpatch%leaf_temp(ico) = csite%can_temp(ipa)
-               cpatch%wood_temp(ico) = cpatch%leaf_temp(ico)
-
+	 !NEW: prescribe temp to canopy air temp, solve for leaf energy diagnostically
+	 101 continue
+	       cpatch%leaf_temp(ico) = cpatch%leaf_temp(ico)
+      	       cpatch%wood_temp(ico) = cpatch%leaf_temp(ico)
+ 
                if (cpatch%leaf_temp(ico) == t3ple) then
-                  cpatch%leaf_fliq(ico) = 0.5
-                  cpatch%wood_fliq(ico) = 0.5
+                  cpatch%wood_fliq(ico)   = 0.5
+		  cpatch%leaf_fliq(ico)   = 0.5
                elseif (cpatch%leaf_temp(ico) > t3ple) then
-                  cpatch%leaf_fliq(ico) = 1.0
-                  cpatch%wood_fliq(ico) = 1.0
+                  cpatch%wood_fliq(ico)   = 1.0
+		  cpatch%leaf_fliq(ico)   = 1.0
                else
-                  cpatch%leaf_fliq(ico) = 0.0
-                  cpatch%wood_fliq(ico) = 0.0
+                  cpatch%wood_fliq(ico)   = 0.0
+		  cpatch%leaf_fliq(ico)   = 0.0
                end if
-               cpatch%leaf_water(ico)   = 0.
-               cpatch%wood_water(ico)   = 0.
+
+      	       cpatch%leaf_hcap(ico) = cpatch%leaf_hcap(ico)
+      	       cpatch%wood_hcap(ico) = cpatch%wood_hcap(ico)
+      	   
+	       if (initp%veg_resolvable(ico)) then
+	       	  !---------------------------------------------------------------------------!
+               	  !     Copy the conductances.                                                !
+		  !---------------------------------------------------------------------------!
+                  cpatch%wood_gbh(ico) = sngloff(initp%wood_gbh(ico), tiny_offset)
+                  cpatch%wood_gbw(ico) = sngloff(initp%wood_gbw(ico), tiny_offset)
+	          cpatch%leaf_gbh(ico) = sngloff(initp%leaf_gbh(ico), tiny_offset)
+	          cpatch%leaf_gbw(ico) = sngloff(initp%leaf_gbw(ico), tiny_offset)
+
+		  cpatch%leaf_water(ico)  = sngloff(initp%wood_water(ico) , tiny_offset)
+	          cpatch%wood_water(ico)  = sngloff(initp%wood_water(ico) , tiny_offset)
+
+                  !---------------------------------------------------------------------------!
+
+	          !---------------------------------------------------------------------------!
+                  !     Divide the values of water demand by the time step to obtain the      !
+                  ! average value over the past hdid period.                                  !
+                  !---------------------------------------------------------------------------!
+                  cpatch%psi_open  (ico) = sngloff(initp%psi_open  (ico),tiny_offset)         &
+                                      / sngl(hdid)
+                  cpatch%psi_closed(ico) = sngloff(initp%psi_closed(ico),tiny_offset)         &
+                                      / sngl(hdid)
+                  !---------------------------------------------------------------------------!
+	       else
+			cpatch%wood_gbh(ico) = 0.0
+               		cpatch%wood_gbw(ico) = 0.0
+	       		cpatch%leaf_gbh(ico) = 0.0
+	       		cpatch%leaf_gbw(ico) = 0.0
+			cpatch%psi_open(ico) = 0.0
+			cpatch%psi_closed(ico) = 0.0
+			cpatch%leaf_water(ico) = 0.0
+			cpatch%wood_water(ico) = 0.0
+               endif
+    
+	       
+      	       cpatch%leaf_energy(ico) = cmtl2uext( cpatch%leaf_hcap(ico)         &
+                                           , cpatch%leaf_water(ico)        &
+                                           , cpatch%leaf_temp(ico)         &
+                                           , cpatch%leaf_fliq(ico)         )
+               cpatch%wood_energy(ico) = cmtl2uext( cpatch%wood_hcap(ico)         &
+                                           , cpatch%wood_water(ico)        &
+                                           , cpatch%wood_temp(ico)         &
+                                           , cpatch%wood_fliq(ico)         )
+ 
+               !----- Copy the meteorological wind to here. -------------------------------!
+               cpatch%veg_wind(ico) = sngloff(rk4site%vels, tiny_offset)
                !---------------------------------------------------------------------------!
-
-
-               !---------------------------------------------------------------------------!
-               !     Find the internal energy diagnostically...                            !
-               !---------------------------------------------------------------------------!
-               cpatch%leaf_energy(ico) = cmtl2uext( cpatch%leaf_hcap (ico)                 &
-                                                  , cpatch%leaf_water(ico)                 &
-                                                  , cpatch%leaf_temp (ico)                 &
-                                                  , cpatch%leaf_fliq (ico)                 )
-               cpatch%wood_energy(ico) = cmtl2uext( cpatch%wood_hcap (ico)                 &
-                                                  , cpatch%wood_water(ico)                 &
-                                                  , cpatch%wood_temp (ico)                 &
-                                                  , cpatch%wood_fliq (ico)                 )
-               !---------------------------------------------------------------------------!
-
-	       !------------------------------------------------------------------------!
-                  !     Copy the conductances.                                             !
-                  !------------------------------------------------------------------------!
-                  cpatch%leaf_gbh(ico) = sngloff(initp%leaf_gbh(ico), tiny_offset)
-                  cpatch%leaf_gbw(ico) = sngloff(initp%leaf_gbw(ico), tiny_offset)
-                  !------------------------------------------------------------------------!
-
-
-
-                  !------------------------------------------------------------------------!
-                  !     Divide the values of water demand by the time step to obtain the   !
-                  ! average value over the past hdid period.                               !
-                  !------------------------------------------------------------------------!
-                  cpatch%psi_open  (ico) = sngloff(initp%psi_open  (ico),tiny_offset)      &
-                                         / sngl(hdid)
-                  cpatch%psi_closed(ico) = sngloff(initp%psi_closed(ico),tiny_offset)      &
-                                         / sngl(hdid)
-                  !------------------------------------------------------------------------!
-
-
                !---------------------------------------------------------------------------!
                !     The intercellular specific humidity is always assumed to be at        !
                ! saturation for a given temperature.  Find the saturation mixing ratio,    !
                ! then convert it to specific humidity.                                     !
                !---------------------------------------------------------------------------!
-               cpatch%lint_shv(ico) = qslif(csite%can_prss(ipa),cpatch%leaf_temp(ico))
-               !----- Copy the meteorological wind to here. -------------------------------!
-               cpatch%veg_wind(ico) = sngloff(rk4site%vels, tiny_offset)
-               !----- Set water demand and conductances to zero. --------------------------!
-!               cpatch%psi_open  (ico) = 0.0
-!               cpatch%psi_closed(ico) = 0.0
-!               cpatch%leaf_gbh  (ico) = 0.0
-!               cpatch%leaf_gbw  (ico) = 0.0
-               cpatch%wood_gbh  (ico) = 0.0
-               cpatch%wood_gbw  (ico) = 0.0
-               !---------------------------------------------------------------------------!
-	 
+               cpatch%lint_shv  (ico) = qslif(csite%can_prss(ipa),cpatch%leaf_temp(ico))
+
+
          !---------------------------------------------------------------------------------!
          !     Final sanity check.  This should be removed soon, since it should never     !
          ! happen (well, if this still happens, then it's a bug, and we should remove the  !
@@ -1296,7 +1315,6 @@ module rk4_driver
          end if
          !---------------------------------------------------------------------------------!
       end do
- 
 
       !------ Copy the ground variables to the output. ------------------------------------!
       csite%ground_shv (ipa) = sngloff(initp%ground_shv , tiny_offset)

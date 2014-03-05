@@ -708,6 +708,7 @@ module rk4_stepper
       !------------------------------------------------------------------------------------!
 
 
+
       !------------------------------------------------------------------------------------!
       !     Check leaf properties, but only for those cohorts with sufficient LAI.         !
       !------------------------------------------------------------------------------------!
@@ -719,7 +720,8 @@ module rk4_stepper
 
          !----- Find the minimum leaf surface water. --------------------------------------!
          rk4min_leaf_water = rk4min_veg_lwater * y%lai(ico)
-
+	 
+	 goto 501
          !----- Check leaf surface water. -------------------------------------------------!
          if (y%leaf_water(ico) < rk4min_leaf_water) then
             reject_step = .true.
@@ -756,7 +758,9 @@ module rk4_stepper
                return
             end if
          end if
+	 501 continue
 
+	 goto 301
          !----- Check leaf temperature. ---------------------------------------------------!
          if (y%leaf_temp(ico) > rk4max_veg_temp .or.                                       &
              y%leaf_temp(ico) < rk4min_veg_temp      ) then
@@ -794,6 +798,8 @@ module rk4_stepper
                return
             end if
          end if
+	 301 continue
+	 
       end do leafloop
       if(record_err .and. cflag7) integ_err(7,2) = integ_err(7,2) + 1_8
       if(record_err .and. cflag8) integ_err(8,2) = integ_err(8,2) + 1_8
@@ -813,6 +819,7 @@ module rk4_stepper
          !----- Find the minimum wood surface water. --------------------------------------!
          rk4min_wood_water = rk4min_veg_lwater * y%wai(ico)
 
+	 goto 601
          !----- Check wood surface water. -------------------------------------------------!
          if (y%wood_water(ico) < rk4min_wood_water) then
             reject_step = .true.
@@ -849,7 +856,9 @@ module rk4_stepper
                return
             end if
          end if
+	 601 continue
 
+	 goto 401
          !----- Check wood temperature. ---------------------------------------------------!
          if (y%wood_temp(ico) > rk4max_veg_temp .or.                                       &
              y%wood_temp(ico) < rk4min_veg_temp      ) then
@@ -887,13 +896,15 @@ module rk4_stepper
                return
             end if
          end if
+	 401 continue
       end do woodloop
       if(record_err .and. cflag9 ) integ_err( 9,2) = integ_err( 9,2) + 1_8
       if(record_err .and. cflag10) integ_err(10,2) = integ_err(10,2) + 1_8
       !------------------------------------------------------------------------------------!
 
 
- 
+
+
       !------------------------------------------------------------------------------------!
       !     Check the water mass of the virtual pool.  The energy is checked only when     !
       ! there is enough mass.                                                              !

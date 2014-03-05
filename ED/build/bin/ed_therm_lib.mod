@@ -1,8 +1,8 @@
-GFORTRAN module version '0' created from ed_therm_lib.f90 on Mon Feb 24 10:59:38 2014
-MD5:0bcb5fc01316b570ac4b1b3a345f922b -- If you edit this, you'll get what you deserve.
+GFORTRAN module version '0' created from ed_therm_lib.f90 on Wed Mar  5 17:00:11 2014
+MD5:b1f6f0e3fca470c39fe9393cdea6a78e -- If you edit this, you'll get what you deserve.
 
-(() () () () () () () () () () () () () () () () ()
-() () () () () () () () () ())
+(() () () () () () () () () () () () () () () ()
+() () () () () () () () () () ())
 
 ()
 
@@ -594,8 +594,6 @@ UNKNOWN DUMMY) (REAL 4 0 0 REAL ()) 0 0 () () 0 () () () 0 0)
 DUMMY) (REAL 4 0 0 REAL ()) 0 0 () () 0 () () () 0 0)
 29 'ksn' '' 'ksn' 28 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN DUMMY) (
 INTEGER 4 0 0 INTEGER ()) 0 0 () () 0 () () () 0 0)
-33 'sfcwater_temp' '' 'sfcwater_temp' 28 ((VARIABLE IN UNKNOWN-PROC
-UNKNOWN UNKNOWN DUMMY) (REAL 8 0 0 REAL ()) 0 0 () () 0 () () () 0 0)
 30 'topsoil_water' '' 'topsoil_water' 28 ((VARIABLE IN UNKNOWN-PROC
 UNKNOWN UNKNOWN DUMMY) (REAL 8 0 0 REAL ()) 0 0 () () 0 () () () 0 0)
 34 'sfcwater_fliq' '' 'sfcwater_fliq' 28 ((VARIABLE IN UNKNOWN-PROC
@@ -617,6 +615,8 @@ DUMMY) (REAL 8 0 0 REAL ()) 0 0 () () 0 () () () 0 0)
 31 'topsoil_temp' '' 'topsoil_temp' 28 ((VARIABLE IN UNKNOWN-PROC
 UNKNOWN UNKNOWN DUMMY) (REAL 8 0 0 REAL ()) 0 0 () () 0 () () () 0 0)
 32 'topsoil_fliq' '' 'topsoil_fliq' 28 ((VARIABLE IN UNKNOWN-PROC
+UNKNOWN UNKNOWN DUMMY) (REAL 8 0 0 REAL ()) 0 0 () () 0 () () () 0 0)
+33 'sfcwater_temp' '' 'sfcwater_temp' 28 ((VARIABLE IN UNKNOWN-PROC
 UNKNOWN UNKNOWN DUMMY) (REAL 8 0 0 REAL ()) 0 0 () () 0 () () () 0 0)
 56 'patchtype' 'ed_state_vars' 'patchtype' 44 ((DERIVED UNKNOWN-INTENT
 UNKNOWN-PROC UNKNOWN UNKNOWN POINTER_COMP) (UNKNOWN 0 0 0 UNKNOWN ()) 0

@@ -407,8 +407,10 @@ subroutine init_ed_patch_vars(csite,ip1,ip2,lsl)
    csite%A_o_max(1:n_pft,ip1:ip2) = 0.0
    csite%A_c_max(1:n_pft,ip1:ip2) = 0.0
 
-   csite%htry(ip1:ip2)  = 1.0
+!   csite%htry(ip1:ip2)  = 1.0
+   csite%htry(ip1:ip2) = 15.0
    csite%hprev(ip1:ip2) = 0.1
+!   csite%hprev(ip1:ip2) = 1.0
 
    csite%co2budget_gpp             (ip1:ip2) = 0.0
    csite%co2budget_gpp_dbh       (:,ip1:ip2) = 0.0

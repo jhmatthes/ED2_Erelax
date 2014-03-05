@@ -394,7 +394,6 @@ subroutine inc_rk4_patch(rkp, inc, fac, cpatch)
    rkp%qpwp = rkp%qpwp + fac * inc%qpwp
    rkp%cpwp = rkp%cpwp + fac * inc%cpwp
 
-!   goto 100
    do ico = 1,cpatch%ncohorts
       rkp%leaf_water (ico) = rkp%leaf_water (ico) + fac * inc%leaf_water (ico)
 !      rkp%leaf_energy(ico) = rkp%leaf_energy(ico) + fac * inc%leaf_energy(ico)
@@ -406,8 +405,7 @@ subroutine inc_rk4_patch(rkp, inc, fac, cpatch)
       rkp%psi_open  (ico) = rkp%psi_open  (ico) + fac * inc%psi_open  (ico)
       rkp%psi_closed(ico) = rkp%psi_closed(ico) + fac * inc%psi_closed(ico)
    end do
-!   100 continue
-   
+
    if (checkbudget) then
 
       rkp%co2budget_storage      = rkp%co2budget_storage     + fac * inc%co2budget_storage
@@ -695,7 +693,7 @@ subroutine get_yscal(y,dy,htry,yscal,cpatch)
    !---------------------------------------------------------------------------------------!
 
 
-   goto 100
+   
    !---------------------------------------------------------------------------------------!
    !    Scale for leaf, wood, and vegetation water and energy.  In case the plants have    !
    ! few or no leaves, or the plant is buried in snow, we assign huge values for typical   !
@@ -716,25 +714,27 @@ subroutine get_yscal(y,dy,htry,yscal,cpatch)
 
          !----- Find the scale only if we must solve veg. ---------------------------------!
          if (y%veg_resolvable(ico)) then
-            yscal%veg_energy(ico) = abs( y%veg_energy(ico))                                &
-                                       + abs(dy%veg_energy(ico) * htry)
+!            yscal%veg_energy(ico) = abs( y%veg_energy(ico))                                &
+!                                       + abs(dy%veg_energy(ico) * htry)
             yscal%veg_water(ico)  = max( abs(y%veg_water(ico))                             &
                                        + abs(dy%veg_water(ico)  * htry)                    &
                                        , rk4leaf_drywhc * y%tai(ico))  
          else
             yscal%veg_water(ico)  = huge_offset
-            yscal%veg_energy(ico) = huge_offset
+!            yscal%veg_energy(ico) = huge_offset
          end if
          !---------------------------------------------------------------------------------!
 
 
+
          !----- No need to scale wood and leaf correctly, let's make it always acceptable. !
          yscal%leaf_water(ico)  = huge_offset
-         yscal%leaf_energy(ico) = huge_offset
-         yscal%leaf_temp(ico)   = huge_offset
+!         yscal%leaf_energy(ico) = huge_offset
+!         yscal%leaf_temp(ico)   = huge_offset
          yscal%wood_water(ico)  = huge_offset
-         yscal%wood_energy(ico) = huge_offset
-         yscal%wood_temp(ico)   = huge_offset
+!         yscal%wood_energy(ico) = huge_offset
+!         yscal%wood_temp(ico)   = huge_offset
+!         yscal%veg_energy(ico)  = huge_offset
          !---------------------------------------------------------------------------------!
       end do
       !------------------------------------------------------------------------------------!
@@ -754,53 +754,49 @@ subroutine get_yscal(y,dy,htry,yscal,cpatch)
 
          !----- Find the scale only if we must solve leaves. ------------------------------!
          if (y%leaf_resolvable(ico)) then
-            yscal%leaf_energy(ico) = abs( y%leaf_energy(ico))                              &
-                                        + abs(dy%leaf_energy(ico) * htry)
-            yscal%leaf_temp(ico)   = abs( y%leaf_temp(ico))
+!            yscal%leaf_energy(ico) = abs( y%leaf_energy(ico))                              &
+!                                        + abs(dy%leaf_energy(ico) * htry)
+!            yscal%leaf_temp(ico)   = abs( y%leaf_temp(ico))
             yscal%leaf_water(ico)  = max( abs(y%leaf_water(ico))                           &
                                         + abs(dy%leaf_water(ico)  * htry)                  &
                                         , rk4leaf_drywhc * y%lai(ico))
          else
             yscal%leaf_water(ico)  = huge_offset
-            yscal%leaf_energy(ico) = huge_offset
-            yscal%leaf_temp(ico)   = huge_offset
+!            yscal%leaf_energy(ico) = huge_offset
+!            yscal%leaf_temp(ico)   = huge_offset
          end if
          !---------------------------------------------------------------------------------!
 
 
          !----- Find the scale only if we must solve wood. --------------------------------!
          if (y%wood_resolvable(ico)) then
-            yscal%wood_energy(ico) = abs( y%wood_energy(ico))                              &
-                                        + abs(dy%wood_energy(ico) * htry)
-            yscal%wood_temp(ico)   = abs( y%wood_temp(ico))
+ !           yscal%wood_energy(ico) = abs( y%wood_energy(ico))                              &
+ !                                       + abs(dy%wood_energy(ico) * htry)
+ !           yscal%wood_temp(ico)   = abs( y%wood_temp(ico))
             yscal%wood_water(ico)  = max( abs(y%wood_water(ico))                           &
                                         + abs(dy%wood_water(ico)  * htry)                  &
                                         , rk4leaf_drywhc * y%wai(ico))
          else
-            yscal%wood_water(ico)  = huge_offset
-            yscal%wood_energy(ico) = huge_offset
-            yscal%wood_temp(ico)   = huge_offset
+ !           yscal%wood_water(ico)  = huge_offset
+ !           yscal%wood_energy(ico) = huge_offset
+ !           yscal%wood_temp(ico)   = huge_offset
          end if
          !---------------------------------------------------------------------------------!
-
-
-
-         !----- No need to scale veg correctly, let's make it always acceptable. ----------!
-         yscal%veg_water(ico)   = huge_offset
-         yscal%veg_energy(ico)  = huge_offset
+         !NEW:
+         !----- No need to scale wood and leaf correctly, let's make it always acceptable. !
+         yscal%leaf_water(ico)  = huge_offset
+!         yscal%leaf_energy(ico) = huge_offset
+!         yscal%leaf_temp(ico)   = huge_offset
+         yscal%wood_water(ico)  = huge_offset
+!         yscal%wood_energy(ico) = huge_offset
+!         yscal%wood_temp(ico)   = huge_offset
+!         yscal%veg_energy(ico)  = huge_offset
          !---------------------------------------------------------------------------------!
       end do
    end select
    !---------------------------------------------------------------------------------------!
-   100 continue
-   do ico=1,cpatch%ncohorts
-     yscal%leaf_water(ico)  = huge_offset !NEW
-     yscal%leaf_energy(ico) = huge_offset
-     yscal%leaf_temp(ico)   = huge_offset
-     yscal%wood_water(ico)  = huge_offset
-     yscal%wood_energy(ico) = huge_offset
-     yscal%wood_temp(ico)   = huge_offset
-   end do
+
+
 
    !---------------------------------------------------------------------------------------!
    !     Here we just need to make sure the user is checking mass, otherwise  these vari-  !
@@ -993,7 +989,7 @@ subroutine get_errmax(errmax,yerr,yscal,cpatch,y,ytemp)
    !---------------------------------------------------------------------------------------!
 
 
-   goto 100
+
    !---------------------------------------------------------------------------------------!
    !     Get the worst error only amongst the cohorts in which leaf or wood properties     !
    ! were computed.                                                                        !
@@ -1009,10 +1005,11 @@ subroutine get_errmax(errmax,yerr,yscal,cpatch,y,ytemp)
       do ico = 1,cpatch%ncohorts
          if (yscal%veg_resolvable(ico)) then
             errh2o     = abs(yerr%veg_water (ico) / yscal%veg_water (ico))
-            errene     = abs(yerr%veg_energy(ico) / yscal%veg_energy(ico))
-            errmax     = max(errmax,errh2o,errene)
+!            errene     = abs(yerr%veg_energy(ico) / yscal%veg_energy(ico))
+!            errmax     = max(errmax,errh2o,errene)
+            errmax     = max(errmax,errh2o)
             errh2oMAX  = max(errh2oMAX ,errh2o )
-            erreneMAX  = max(erreneMAX ,errene )
+!            erreneMAX  = max(erreneMAX ,errene )
          end if
       end do
       if(cpatch%ncohorts > 0 .and. record_err) then
@@ -1020,10 +1017,10 @@ subroutine get_errmax(errmax,yerr,yscal,cpatch,y,ytemp)
             integ_err( 7,1) = integ_err( 7,1) + 1_8
             integ_err( 9,1) = integ_err( 9,1) + 1_8
          end if
-         if (erreneMAX  > rk4eps) then
-            integ_err( 8,1) = integ_err( 8,1) + 1_8
-            integ_err(10,1) = integ_err(10,1) + 1_8
-         end if
+!         if (erreneMAX  > rk4eps) then
+!            integ_err( 8,1) = integ_err( 8,1) + 1_8
+!            integ_err(10,1) = integ_err(10,1) + 1_8
+!         end if
       end if
       !------------------------------------------------------------------------------------!
 
@@ -1034,40 +1031,42 @@ subroutine get_errmax(errmax,yerr,yscal,cpatch,y,ytemp)
       !------------------------------------------------------------------------------------!
       !----- Leaves. ----------------------------------------------------------------------!
       errh2oMAX  = 0.d0
-      erreneMAX  = 0.d0
+!      erreneMAX  = 0.d0
       do ico = 1,cpatch%ncohorts
          if (yscal%leaf_resolvable(ico)) then
             errh2o     = abs(yerr%leaf_water (ico) / yscal%leaf_water (ico))
-            errene     = abs(yerr%leaf_energy(ico) / yscal%leaf_energy(ico))
-            errmax     = max(errmax,errh2o,errene)
+!            errene     = abs(yerr%leaf_energy(ico) / yscal%leaf_energy(ico))
+!            errmax     = max(errmax,errh2o,errene)
+            errmax     = max(errmax,errh2o)
             errh2oMAX  = max(errh2oMAX ,errh2o )
-            erreneMAX  = max(erreneMAX ,errene )
+!            erreneMAX  = max(erreneMAX ,errene )
          end if
       end do
       if(cpatch%ncohorts > 0 .and. record_err) then
          if (errh2oMAX  > rk4eps) integ_err(7,1) = integ_err(7,1) + 1_8
-         if (erreneMAX  > rk4eps) integ_err(8,1) = integ_err(8,1) + 1_8
+!         if (erreneMAX  > rk4eps) integ_err(8,1) = integ_err(8,1) + 1_8
       end if
       !----- Wood. ------------------------------------------------------------------------!
       errh2oMAX  = 0.d0
-      erreneMAX  = 0.d0
+!      erreneMAX  = 0.d0
       do ico = 1,cpatch%ncohorts
          if (yscal%wood_resolvable(ico)) then
             errh2o     = abs(yerr%wood_water (ico) / yscal%wood_water (ico))
-            errene     = abs(yerr%wood_energy(ico) / yscal%wood_energy(ico))
-            errmax     = max(errmax,errh2o,errene)
+!            errene     = abs(yerr%wood_energy(ico) / yscal%wood_energy(ico))
+!            errmax     = max(errmax,errh2o,errene)
+            errmax     = max(errmax,errh2o)
             errh2oMAX  = max(errh2oMAX ,errh2o )
-            erreneMAX  = max(erreneMAX ,errene )
+!            erreneMAX  = max(erreneMAX ,errene )
          end if
       end do
       if(cpatch%ncohorts > 0 .and. record_err) then
          if (errh2oMAX  > rk4eps) integ_err( 9,1) = integ_err( 9,1) + 1_8
-         if (erreneMAX  > rk4eps) integ_err(10,1) = integ_err(10,1) + 1_8
+!         if (erreneMAX  > rk4eps) integ_err(10,1) = integ_err(10,1) + 1_8
       end if
       !------------------------------------------------------------------------------------!
    end select
    !---------------------------------------------------------------------------------------!
-   100 continue
+
 
    !---------------------------------------------------------------------------------------!
    !     Virtual pool.                                                                     !
@@ -1276,10 +1275,10 @@ subroutine copy_rk4_patch(sourcep, targetp, cpatch)
 
    do k=1,cpatch%ncohorts
       targetp%leaf_resolvable (k) = sourcep%leaf_resolvable (k)
-      targetp%leaf_energy     (k) = sourcep%leaf_energy     (k)
+!      targetp%leaf_energy     (k) = sourcep%leaf_energy     (k)
       targetp%leaf_water      (k) = sourcep%leaf_water      (k)
-      targetp%leaf_temp       (k) = sourcep%leaf_temp       (k)
-      targetp%leaf_fliq       (k) = sourcep%leaf_fliq       (k)
+!      targetp%leaf_temp       (k) = sourcep%leaf_temp       (k)
+!      targetp%leaf_fliq       (k) = sourcep%leaf_fliq       (k)
       targetp%leaf_hcap       (k) = sourcep%leaf_hcap       (k)
       targetp%leaf_reynolds   (k) = sourcep%leaf_reynolds   (k)
       targetp%leaf_grashof    (k) = sourcep%leaf_grashof    (k)
@@ -1291,10 +1290,10 @@ subroutine copy_rk4_patch(sourcep, targetp, cpatch)
       targetp%rlong_l         (k) = sourcep%rlong_l         (k)
 
       targetp%wood_resolvable (k) = sourcep%wood_resolvable (k)
-      targetp%wood_energy     (k) = sourcep%wood_energy     (k)
+!      targetp%wood_energy     (k) = sourcep%wood_energy     (k)
       targetp%wood_water      (k) = sourcep%wood_water      (k)
-      targetp%wood_temp       (k) = sourcep%wood_temp       (k)
-      targetp%wood_fliq       (k) = sourcep%wood_fliq       (k)
+!      targetp%wood_temp       (k) = sourcep%wood_temp       (k)
+!      targetp%wood_fliq       (k) = sourcep%wood_fliq       (k)
       targetp%wood_hcap       (k) = sourcep%wood_hcap       (k)
       targetp%wood_reynolds   (k) = sourcep%wood_reynolds   (k)
       targetp%wood_grashof    (k) = sourcep%wood_grashof    (k)

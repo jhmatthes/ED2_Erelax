@@ -1,5 +1,5 @@
-GFORTRAN module version '0' created from allometry.f90 on Mon Feb 24 10:59:21 2014
-MD5:7b2f00da981f72998a8007441c7f5afb -- If you edit this, you'll get what you deserve.
+GFORTRAN module version '0' created from allometry.f90 on Wed Mar  5 16:59:51 2014
+MD5:882f42eed0011881d42c0fb875c0730c -- If you edit this, you'll get what you deserve.
 
 (() () () () () () () () () () () () () () () () () () () () ()
 () () () () () ())
@@ -64,24 +64,24 @@ MODULE-PROC DECL UNKNOWN FUNCTION) (REAL 4 0 0 REAL ()) 77 0 (78 79 80)
 REAL 4 0 0 REAL ()) 0 0 () () 0 () () () 0 0)
 75 'ipft' '' 'ipft' 73 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN DUMMY)
 (INTEGER 4 0 0 INTEGER ()) 0 0 () () 0 () () () 0 0)
-32 'ipft' '' 'ipft' 30 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN DUMMY)
-(INTEGER 4 0 0 INTEGER ()) 0 0 () () 0 () () () 0 0)
 31 'dbh' '' 'dbh' 30 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN DUMMY) (
 REAL 4 0 0 REAL ()) 0 0 () () 0 () () () 0 0)
+32 'ipft' '' 'ipft' 30 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN DUMMY)
+(INTEGER 4 0 0 INTEGER ()) 0 0 () () 0 () () () 0 0)
 45 'ipft' '' 'ipft' 44 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN DUMMY)
 (INTEGER 4 0 0 INTEGER ()) 0 0 () () 0 () () () 0 0)
 46 'dbh' '' 'dbh' 44 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN DUMMY) (
 REAL 4 0 0 REAL ()) 0 0 () () 0 () () () 0 0)
-20 'bdead' '' 'bdead' 18 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN
-DUMMY) (REAL 4 0 0 REAL ()) 0 0 () () 0 () () () 0 0)
+19 'ipft' '' 'ipft' 18 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN DUMMY)
+(INTEGER 4 0 0 INTEGER ()) 0 0 () () 0 () () () 0 0)
 80 'ipft' '' 'ipft' 77 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN DUMMY)
 (INTEGER 4 0 0 INTEGER ()) 0 0 () () 0 () () () 0 0)
 78 'dbh' '' 'dbh' 77 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN DUMMY) (
 REAL 4 0 0 REAL ()) 0 0 () () 0 () () () 0 0)
 79 'hite' '' 'hite' 77 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN DUMMY)
 (REAL 4 0 0 REAL ()) 0 0 () () 0 () () () 0 0)
-19 'ipft' '' 'ipft' 18 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN DUMMY)
-(INTEGER 4 0 0 INTEGER ()) 0 0 () () 0 () () () 0 0)
+20 'bdead' '' 'bdead' 18 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN
+DUMMY) (REAL 4 0 0 REAL ()) 0 0 () () 0 () () () 0 0)
 35 'dbh' '' 'dbh' 34 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN DUMMY) (
 REAL 4 0 0 REAL ()) 0 0 () () 0 () () () 0 0)
 36 'ipft' '' 'ipft' 34 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN DUMMY)

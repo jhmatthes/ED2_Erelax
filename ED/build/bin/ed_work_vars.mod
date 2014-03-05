@@ -1,4 +1,4 @@
-GFORTRAN module version '0' created from ed_work_vars.f90 on Mon Feb 24 10:59:50 2014
+GFORTRAN module version '0' created from ed_work_vars.f90 on Wed Mar  5 17:00:25 2014
 MD5:bc2825fdb4eca4d29e8c646122c14815 -- If you edit this, you'll get what you deserve.
 
 (() () ()

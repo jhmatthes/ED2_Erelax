@@ -760,8 +760,8 @@ subroutine leaftw_derivs(mzg,mzs,initp,dinitp,csite,ipa,dt)
                      ! eventually lost to the canopy air space because of transpiration,   !
                      ! but we will do it in two steps so we ensure energy is conserved.    !
                      !---------------------------------------------------------------------!
-                     dinitp%leaf_energy(ico) = dinitp%leaf_energy(ico)  + qloss
-                     dinitp%veg_energy(ico)  = dinitp%veg_energy(ico)   + qloss
+!                     dinitp%leaf_energy(ico) = dinitp%leaf_energy(ico)  + qloss
+!                     dinitp%veg_energy(ico)  = dinitp%veg_energy(ico)   + qloss
                      initp%hflx_lrsti(ico) = initp%hflx_lrsti(ico)      + qloss
                      !---------------------------------------------------------------------!
 
@@ -1289,6 +1289,7 @@ subroutine canopy_derivs_two(mzg,initp,dinitp,csite,ipa,hflxgc,wflxgc,qwflxgc,de
                !---------------------------------------------------------------------------!
                wflxlc  = wflxlc_try * sigmaw
                qwflxlc = wflxlc * tq2enthalpy8(initp%leaf_temp(ico),1.d0,.true.)
+!	       qwflxlc = wflxlc * tq2enthalpy8(initp%leaf_temp(ico),1.d0,.true.)
 
 
 
@@ -1308,6 +1309,7 @@ subroutine canopy_derivs_two(mzg,initp,dinitp,csite,ipa,hflxgc,wflxgc,qwflxgc,de
                   wshed  = max(0.d0,( (initp%leaf_water(ico) + leaf_intercepted*dt)        &
                                     - max_leaf_water) / dt)
                   qwshed = wshed * tl2uint8(initp%leaf_temp(ico),initp%leaf_fliq(ico))
+!		  qwshed = wshed * tl2uint8(cpatch%leaf_temp(ico),cpatch%leaf_fliq(ico))
                   dwshed = wshed * ( initp%leaf_fliq(ico) * wdnsi8                         &
                                    + (1.d0-initp%leaf_fliq(ico)) * fdnsi8)
                   !------------------------------------------------------------------------!
@@ -1352,6 +1354,7 @@ subroutine canopy_derivs_two(mzg,initp,dinitp,csite,ipa,hflxgc,wflxgc,qwflxgc,de
                ! latent heat.                                                              !
                !---------------------------------------------------------------------------! 
                qtransp = transp * tq2enthalpy8(initp%leaf_temp(ico),1.d0,.true.)
+!	       qtransp = transp * tq2enthalpy8(cpatch%leaf_temp(ico),1.d0,.true.)
                !---------------------------------------------------------------------------! 
 
             else
@@ -1372,6 +1375,7 @@ subroutine canopy_derivs_two(mzg,initp,dinitp,csite,ipa,hflxgc,wflxgc,qwflxgc,de
             !------------------------------------------------------------------------------!
             wflxlc                 = wflxlc_try
             qwflxlc                = wflxlc * tq2enthalpy8(initp%leaf_temp(ico),1.d0,.true.)
+!	    qwflxlc                = wflxlc * tq2enthalpy8(cpatch%leaf_temp(ico),1.d0,.true.)
             transp                 = 0.0d0
             qtransp                = 0.0d0
             dinitp%psi_open  (ico) = 0.0d0
@@ -1398,6 +1402,8 @@ subroutine canopy_derivs_two(mzg,initp,dinitp,csite,ipa,hflxgc,wflxgc,qwflxgc,de
          flux_area = effarea_heat * initp%lai(ico)
          hflxlc    = flux_area    * initp%leaf_gbh(ico)                                    &
                    * (initp%leaf_temp(ico) - initp%can_temp)
+!          hflxlc    = flux_area    * initp%leaf_gbh(ico)                                    &
+!                   * (cpatch%leaf_temp(ico) - initp%can_temp)
          !---------------------------------------------------------------------------------!
 
 
@@ -1425,13 +1431,15 @@ subroutine canopy_derivs_two(mzg,initp,dinitp,csite,ipa,hflxgc,wflxgc,qwflxgc,de
          dinitp%leaf_water(ico)  = leaf_intercepted     & ! Intercepted water 
                                  - wflxlc               & ! Evaporation
                                  - wshed                ! ! Water shedding
-         dinitp%leaf_energy(ico) = initp%rshort_l(ico)  & ! Absorbed SW radiation
-                                 + initp%rlong_l(ico)   & ! Net thermal radiation
-                                 - hflxlc               & ! Sensible heat flux
-                                 - qwflxlc              & ! Evaporation
-                                 - qwshed               & ! Water shedding
-                                 - qtransp              & ! Transpiration
-                                 + leaf_qintercepted    ! ! Intercepted water energy
+
+
+!         dinitp%leaf_energy(ico) = initp%rshort_l(ico)  & ! Absorbed SW radiation
+!                                 + initp%rlong_l(ico)   & ! Net thermal radiation
+!                                 - hflxlc               & ! Sensible heat flux
+!                                 - qwflxlc              & ! Evaporation
+!                                 - qwshed               & ! Water shedding
+!                                 - qtransp              & ! Transpiration
+!                                 + leaf_qintercepted    ! ! Intercepted water energy
          !---------------------------------------------------------------------------------!
 
 
@@ -1481,7 +1489,7 @@ subroutine canopy_derivs_two(mzg,initp,dinitp,csite,ipa,hflxgc,wflxgc,qwflxgc,de
          !     If there is not enough leaf biomass to safely solve the leaf energy and     !
          ! water balances, set leaf fluxes and interception to zero.                       !
          !---------------------------------------------------------------------------------!
-         dinitp%leaf_energy(ico) = 0.d0
+ !        dinitp%leaf_energy(ico) = 0.d0
          dinitp%leaf_water(ico)  = 0.d0
          dinitp%psi_open(ico)    = 0.d0
          dinitp%psi_closed(ico)  = 0.d0
@@ -1632,12 +1640,12 @@ subroutine canopy_derivs_two(mzg,initp,dinitp,csite,ipa,hflxgc,wflxgc,qwflxgc,de
          dinitp%wood_water(ico)  = wood_intercepted     & ! Intercepted water 
                                  - wflxwc               & ! Evaporation
                                  - wshed                ! ! Water shedding
-         dinitp%wood_energy(ico) = initp%rshort_w(ico)  & ! Absorbed SW radiation
-                                 + initp%rlong_w(ico)   & ! Net thermal radiation
-                                 - hflxwc               & ! Sensible heat flux
-                                 - qwflxwc              & ! Evaporation
-                                 - qwshed               & ! Water shedding
-                                 + wood_qintercepted    ! ! Intercepted water energy
+ !        dinitp%wood_energy(ico) = initp%rshort_w(ico)  & ! Absorbed SW radiation                     
+ !           + initp%rlong_w(ico)   & ! Net thermal radiation
+ !                                - hflxwc               & ! Sensible heat flux
+ !                                - qwflxwc              & ! Evaporation
+ !                                - qwshed               & ! Water shedding
+ !                                + wood_qintercepted    ! ! Intercepted water energy
          !---------------------------------------------------------------------------------!
 
          initp%wflxwc(ico) = wflxwc
@@ -1684,7 +1692,7 @@ subroutine canopy_derivs_two(mzg,initp,dinitp,csite,ipa,hflxgc,wflxgc,qwflxgc,de
          !     If there is not enough leaf biomass to safely solve the leaf energy and     !
          ! water balances, set leaf fluxes and interception to zero.                       !
          !---------------------------------------------------------------------------------!
-         dinitp%wood_energy(ico) = 0.d0
+!         dinitp%wood_energy(ico) = 0.d0
          dinitp%wood_water(ico)  = 0.d0
          !---------------------------------------------------------------------------------!
 
@@ -1712,7 +1720,7 @@ subroutine canopy_derivs_two(mzg,initp,dinitp,csite,ipa,hflxgc,wflxgc,qwflxgc,de
 
 
       !------ Find the combined leaf + wood derivative. -----------------------------------!
-      dinitp%veg_energy(ico) = dinitp%leaf_energy(ico) + dinitp%wood_energy(ico)
+!      dinitp%veg_energy(ico) = dinitp%leaf_energy(ico) + dinitp%wood_energy(ico)
       dinitp%veg_water (ico) = dinitp%leaf_water (ico) + dinitp%wood_water (ico)
       !------------------------------------------------------------------------------------!
    end do cohortloop
