@@ -335,7 +335,6 @@ module rk4_stepper
       !------------------------------------------------------------------------------------!
 
 
-
       !------------------------------------------------------------------------------------!
       !    Fourth stage.                                                                   !
       !------------------------------------------------------------------------------------!
@@ -408,6 +407,7 @@ module rk4_stepper
       call inc_rk4_patch(yout,  ak4, rk4_c4*h, cpatch)
       call inc_rk4_patch(yout,  ak6, rk4_c6*h, cpatch)
       combh = (rk4_c1+rk4_c3+rk4_c4+rk4_c6)*h
+
       call update_diagnostic_vars   (yout, csite,ipa)
       call rk4_sanity_check(yout, reject_result, csite,ipa,dydx,h,print_diags)
       !------------------------------------------------------------------------------------!

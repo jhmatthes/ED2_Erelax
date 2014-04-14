@@ -2854,10 +2854,10 @@ subroutine adjust_veg_properties(initp,hdid,csite,ipa)
          ! this happens as loss of internal energy (shedding) or latent heat (fast         !
          ! dew/boiling).                                                                   !
          !---------------------------------------------------------------------------------!
-         call uextcm2tl8(initp%leaf_energy(ico),initp%leaf_water(ico),initp%leaf_hcap(ico) &
-                        ,initp%leaf_temp(ico),initp%leaf_fliq(ico))
-         old_leaf_energy = initp%leaf_energy(ico)
-         old_leaf_water  = initp%leaf_water (ico)
+!         call uextcm2tl8(initp%leaf_energy(ico),initp%leaf_water(ico),initp%leaf_hcap(ico) &
+!                        ,initp%leaf_temp(ico),initp%leaf_fliq(ico))
+!         old_leaf_energy = initp%leaf_energy(ico)
+!         old_leaf_water  = initp%leaf_water (ico)
          old_leaf_temp   = initp%leaf_temp  (ico)
          old_leaf_fliq   = initp%leaf_fliq  (ico)
          !---------------------------------------------------------------------------------!
@@ -2880,8 +2880,8 @@ subroutine adjust_veg_properties(initp,hdid,csite,ipa)
             !----- Update water mass and energy. ------------------------------------------!
             initp%leaf_water (ico) = initp%leaf_water (ico) - leaf_wshed
             initp%veg_water  (ico) = initp%veg_water  (ico) - leaf_wshed
-            initp%leaf_energy(ico) = initp%leaf_energy(ico) - leaf_qwshed
-            initp%veg_energy (ico) = initp%veg_energy (ico) - leaf_qwshed
+!            initp%leaf_energy(ico) = initp%leaf_energy(ico) - leaf_qwshed
+!            initp%veg_energy (ico) = initp%veg_energy (ico) - leaf_qwshed
 
             !----- Update fluxes if needed be. --------------------------------------------!
             if (print_detailed) then
@@ -2915,8 +2915,8 @@ subroutine adjust_veg_properties(initp,hdid,csite,ipa)
             !----- Update cohort state variables. -----------------------------------------!
             initp%leaf_water (ico)  = 0.d0
             initp%veg_water  (ico)  = initp%veg_water(ico)    + leaf_dew  - leaf_boil
-            initp%leaf_energy(ico)  = initp%leaf_energy(ico)  + leaf_qdew - leaf_qboil
-            initp%veg_energy (ico)  = initp%veg_energy(ico)   + leaf_qdew - leaf_qboil
+ !           initp%leaf_energy(ico)  = initp%leaf_energy(ico)  + leaf_qdew - leaf_qboil
+ !           initp%veg_energy (ico)  = initp%veg_energy(ico)   + leaf_qdew - leaf_qboil
             !------------------------------------------------------------------------------!
 
 
@@ -2953,12 +2953,12 @@ subroutine adjust_veg_properties(initp,hdid,csite,ipa)
          ! this happens as loss of internal energy (shedding) or latent heat (fast         !
          ! dew/boiling).                                                                   !
          !---------------------------------------------------------------------------------!
-         call uextcm2tl8(initp%wood_energy(ico),initp%wood_water(ico),initp%wood_hcap(ico) &
-                        ,initp%wood_temp(ico),initp%wood_fliq(ico))
-         old_wood_energy = initp%wood_energy(ico)
-         old_wood_water  = initp%wood_water (ico)
-         old_wood_temp   = initp%wood_temp  (ico)
-         old_wood_fliq   = initp%wood_fliq  (ico)
+ !        call uextcm2tl8(initp%wood_energy(ico),initp%wood_water(ico),initp%wood_hcap(ico) &
+ !                       ,initp%wood_temp(ico),initp%wood_fliq(ico))
+ !        old_wood_energy = initp%wood_energy(ico)
+ !        old_wood_water  = initp%wood_water (ico)
+ !        old_wood_temp   = initp%wood_temp  (ico)
+ !        old_wood_fliq   = initp%wood_fliq  (ico)
          !---------------------------------------------------------------------------------!
 
          if (initp%wood_water(ico) > max_wood_water) then
@@ -2983,8 +2983,8 @@ subroutine adjust_veg_properties(initp,hdid,csite,ipa)
             !----- Update water mass and energy. ------------------------------------------!
             initp%wood_water (ico) = initp%wood_water (ico) - wood_wshed
             initp%veg_water  (ico) = initp%veg_water  (ico) - wood_wshed
-            initp%wood_energy(ico) = initp%wood_energy(ico) - wood_qwshed
-            initp%veg_energy (ico) = initp%veg_energy (ico) - wood_qwshed
+ !           initp%wood_energy(ico) = initp%wood_energy(ico) - wood_qwshed
+ !           initp%veg_energy (ico) = initp%veg_energy (ico) - wood_qwshed
 
             !----- Update fluxes if needed be. --------------------------------------------!
             if (print_detailed) then
@@ -3016,8 +3016,8 @@ subroutine adjust_veg_properties(initp,hdid,csite,ipa)
             !----- Update cohort state variables. -----------------------------------------!
             initp%wood_water (ico) = 0.d0
             initp%veg_water  (ico) = initp%veg_water  (ico)  + wood_dew  - wood_boil
-            initp%wood_energy(ico) = initp%wood_energy(ico)  + wood_qdew - wood_qboil
-            initp%veg_energy (ico) = initp%veg_energy (ico)  + wood_qdew - wood_qboil
+ !           initp%wood_energy(ico) = initp%wood_energy(ico)  + wood_qdew - wood_qboil
+ !           initp%veg_energy (ico) = initp%veg_energy (ico)  + wood_qdew - wood_qboil
             !------------------------------------------------------------------------------!
 
             !----- Update fluxes if needed be. --------------------------------------------!

@@ -1178,19 +1178,19 @@ module rk4_driver
 
 	 !NEW: prescribe temp to canopy air temp, solve for leaf energy diagnostically
 	 101 continue
-	       cpatch%leaf_temp(ico) = cpatch%leaf_temp(ico)
-      	       cpatch%wood_temp(ico) = cpatch%leaf_temp(ico)
+!	       cpatch%leaf_temp(ico) = cpatch%leaf_temp(ico)
+!      	       cpatch%wood_temp(ico) = cpatch%leaf_temp(ico)
  
-               if (cpatch%leaf_temp(ico) == t3ple) then
-                  cpatch%wood_fliq(ico)   = 0.5
-		  cpatch%leaf_fliq(ico)   = 0.5
-               elseif (cpatch%leaf_temp(ico) > t3ple) then
-                  cpatch%wood_fliq(ico)   = 1.0
-		  cpatch%leaf_fliq(ico)   = 1.0
-               else
-                  cpatch%wood_fliq(ico)   = 0.0
-		  cpatch%leaf_fliq(ico)   = 0.0
-               end if
+!               if (cpatch%leaf_temp(ico) == t3ple) then
+!                  cpatch%wood_fliq(ico)   = 0.5
+!		  cpatch%leaf_fliq(ico)   = 0.5
+!               elseif (cpatch%leaf_temp(ico) > t3ple) then
+!                  cpatch%wood_fliq(ico)   = 1.0
+!		  cpatch%leaf_fliq(ico)   = 1.0
+!               else
+!                  cpatch%wood_fliq(ico)   = 0.0
+!		  cpatch%leaf_fliq(ico)   = 0.0
+!               end if
 
       	       cpatch%leaf_hcap(ico) = cpatch%leaf_hcap(ico)
       	       cpatch%wood_hcap(ico) = cpatch%wood_hcap(ico)

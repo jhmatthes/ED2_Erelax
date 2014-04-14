@@ -1305,7 +1305,7 @@ subroutine copy_rk4_patch(sourcep, targetp, cpatch)
       targetp%rlong_w         (k) = sourcep%rlong_w         (k)
 
       targetp%veg_resolvable  (k) = sourcep%veg_resolvable  (k)
-      targetp%veg_energy      (k) = sourcep%veg_energy      (k)
+!      targetp%veg_energy      (k) = sourcep%veg_energy      (k)
       targetp%veg_water       (k) = sourcep%veg_water       (k)
       targetp%veg_hcap        (k) = sourcep%veg_hcap        (k)
 
